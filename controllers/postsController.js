@@ -11,41 +11,20 @@ router.get('/', (req, res, next) => {
     .catch(next)
 });
 
-router.get('/:userId',(req,res,next)=>{
-    User.findById(req.params.userId)
-    .populate('posts.author')
-    .then ((user)=>{
-        if (user){
-            res.json(user.post)
+router.get('/:id', (req, res, next) => {
+	Post.findById({ _id: req.params.id }).then((post) => {
+		if (post) {
+            res.json(post);
         } else {
             res.sendStatus(404)
         }
-        
-    })
+	})
     .catch(next)
-})
-
-router.get('/:userId/:postId', (req, res, next) =>{
-    User.findById(req.params.userId)
-    .populate('posts.user')
-    .then((user) => {
-        if(user) {
-            const foundUser=user.posts.find(post=>post._id.toString()=== req.params.postId)
-            if (foundUser) {
-                res.json(foundUser)
-            }
-            else {
-                res.sendStatus(404)
-            }
-        } else 
-            res.sendStatus(404)
-    })
-    .catch(next)
-})
+});
 
 
 router.post('/', requireToken, (req, res, next) => {
-    Post.create(req.body)
+    User.create(req.body)
     .then((user) => {
         const requestor = req.user._id.toString()
         if (user) {
@@ -61,11 +40,11 @@ router.post('/', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-router.delete('/:userId/:postId' , requireToken, (req, res, next)=>{
-    User.findById(req.params.userId)
+router.delete('/:id' , requireToken, (req, res, next)=>{
+    Post.findById(req.params.postId)
     .then((user)=>{
         if(user){
-            const foundPost = user.posts.id(req.params.postId)
+            const foundPost = posts.id(req.params.postId)
             if (!foundPost) {
                 return res.sendStatus(404)
             }
