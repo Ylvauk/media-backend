@@ -45,14 +45,12 @@ router.get('/:userId/:postId', (req, res, next) =>{
 
 
 router.post('/', requireToken, (req, res, next) => {
-    const userId = req.body.userId;
-    User.findById(userId)
-    .then((foodTruck) => {
+    Post.create(req.body)
+    .then((user) => {
         const requestor = req.user._id.toString()
         if (user) {
             if (requestor) {
-                user.posts.push(req.body)
-                return post.save()
+                return user.save()
             } else {
                 res.sendStatus(401)
             }
