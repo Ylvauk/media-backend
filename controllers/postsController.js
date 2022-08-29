@@ -49,24 +49,30 @@ router.delete('/:id', async (req, res, next) => {
     }
 })
 
-router.put('/:id', async (req, res, next) => {
-    try{
-        const updatedPost=await Post.findbyIdAndUpdate(
-        req.params.id,
-        req.body,
-        req.title,
-        {
-            new: true
-        }
-        )
-        if(updatedPost){
-            res.json(updatedPost);
+router.put('/:postId', requireToken, (req, res, next) => {
+    const postId = req.params.postId
+    FoodTruck.findOne({
+        'posts._id': postId,
+    })
+    .then((user)=>{
+        if (user) {
+            const foundPost = user.posts.id(postId)
+            const author = foundPost.user.toString()
+            const requestor = req.user._id.toString()
+            if (foundPost && author === requestor) {
+                foundPost.set(req.body)
+                user.save()
+                return res.status(201).json( { user: user } )
+            } else if (author !== requestor){
+                res.sendStatus(401)
+            } else {
+                res.sendStatus(404)
+            }
         } else {
-            res.sendStatus(404);
+            res.sendStatus(404)
         }
-
-    } catch (error) {
-        next(err)}
+    })
+    .catch(next)
 })
 
 
