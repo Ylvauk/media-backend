@@ -40,28 +40,13 @@ router.post('/', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-router.delete('/:id' , requireToken, (req, res, next)=>{
-    Post.findById(req.params.postId)
-    .then((user)=>{
-        if(user){
-            const foundPost = posts.id(req.params.postId)
-            if (!foundPost) {
-                return res.sendStatus(404)
-            }
-            const author = foundPost.user.toString()
-            const requestor = req.user._id.toString()
-            if (foundUser && author === requestor) {
-                foundPost.remove()
-                user.save()
-                res.sendStatus(204)
-            } else if (author !== requestor){
-                res.sendStatus(401)
-            }
-        } else {
-            res.sendStatus(404)
-        }
-    })
-    .catch(next)
+router.delete('/:id', async (req, res, next) => {
+    try{
+        const deletedPost = await Post.findByIdAndDelete(req.params.id)
+        res.json(deletedPost)
+    } catch(err){
+        next(error)
+    }
 })
 
 router.put('/:postId', requireToken, (req, res, next) => {
