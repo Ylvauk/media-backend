@@ -22,51 +22,39 @@ router.get('/:id', (req, res, next) => {
     .catch(next)
 });
 
-
 router.post('/', requireToken, (req, res, next) => {
-    Post.create(req.body)
-    .then((post) => {
+    User.create(req.body)
+    .then((user) => {
         const requestor = req.user._id.toString()
-        if (post) {
+        if (user) {
             if (requestor) {
-                return post.save()
+                return user.save()
             } else {
                 res.sendStatus(401)
             }
         } else {
             res.sendStatus(404)
         }})
-    .then((post) => res.status(201).json( { post: post } ))
+    .then((user) => res.status(201).json( { user: user } ))
     .catch(next)
 })
 
-router.delete('/:id', async (req, res, next) => {
-    try{
-        const deletedPost = await Post.findByIdAndDelete(req.params.id)
-        res.json(deletedPost)
-    } catch(err){
-        next(error)
-    }
-})
-
-router.put('/:postId', requireToken, (req, res, next) => {
-    const postId = req.params.postId
-    Post.findOne({
-        'posts._id': postId,
-    })
-    .then((user)=>{
-        if (user) {
-            const foundPost = user.posts.id(postId)
-            const author = foundPost.user.toString()
+router.delete('/:id' , requireToken, (req, res, next)=>{
+    Post.findByIdAndDelete(req.params.id)
+    .then((post)=>{
+        if(post){
+            const foundPost = post.id(req.params.id)
+            if (!foundPost) {
+                return res.sendStatus(404)
+            }
+            const author = post.user.toString()
             const requestor = req.user._id.toString()
-            if (foundPost && author === requestor) {
-                foundPost.set(req.body)
-                user.save()
-                return res.status(201).json( { user: user } )
+            if (foundUser && author === requestor) {
+                foundPost.remove()
+                post.save()
+                res.sendStatus(204)
             } else if (author !== requestor){
                 res.sendStatus(401)
-            } else {
-                res.sendStatus(404)
             }
         } else {
             res.sendStatus(404)
@@ -75,5 +63,19 @@ router.put('/:postId', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+router.put('/:postId', requireToken, (req, res, next) => {
+    Post.findByIdAndUpdate(
+        {_id: req.params.postId},
+        req.body,
+        { new: true, })
+        .then((post) => {
+            if (post) {
+                res.json(post);
+            } else {
+                res.sendStatus(404)
+            }
+        })
+        .catch(next)
+    })
 
 module.exports = router;
