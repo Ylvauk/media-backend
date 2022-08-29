@@ -24,19 +24,19 @@ router.get('/:id', (req, res, next) => {
 
 
 router.post('/', requireToken, (req, res, next) => {
-    User.create(req.body)
-    .then((user) => {
+    Post.create(req.body)
+    .then((post) => {
         const requestor = req.user._id.toString()
-        if (user) {
+        if (post) {
             if (requestor) {
-                return user.save()
+                return post.save()
             } else {
                 res.sendStatus(401)
             }
         } else {
             res.sendStatus(404)
         }})
-    .then((user) => res.status(201).json( { user: user } ))
+    .then((post) => res.status(201).json( { post: post } ))
     .catch(next)
 })
 
@@ -51,7 +51,7 @@ router.delete('/:id', async (req, res, next) => {
 
 router.put('/:postId', requireToken, (req, res, next) => {
     const postId = req.params.postId
-    FoodTruck.findOne({
+    Post.findOne({
         'posts._id': postId,
     })
     .then((user)=>{
