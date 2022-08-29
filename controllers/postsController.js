@@ -51,7 +51,7 @@ router.delete('/:id', async (req, res, next) => {
 
 router.put('/:postId', requireToken, (req, res, next) => {
     const postId = req.params.postId
-    FoodTruck.findOne({
+    Post.findOne({
         'posts._id': postId,
     })
     .then((user)=>{
