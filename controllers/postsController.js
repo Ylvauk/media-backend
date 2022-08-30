@@ -23,7 +23,7 @@ router.get('/:id', (req, res, next) => {
 });
 
 router.post('/', requireToken, (req, res, next) => {
-    User.create(req.body)
+    Post.create(req.body)
     .then((user) => {
         const requestor = req.user._id.toString()
         if (user) {
